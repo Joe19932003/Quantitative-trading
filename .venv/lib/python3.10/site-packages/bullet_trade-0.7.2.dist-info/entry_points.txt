@@ -1,0 +1,2 @@
+[console_scripts]
+bullet-trade = bullet_trade.cli.main:main
