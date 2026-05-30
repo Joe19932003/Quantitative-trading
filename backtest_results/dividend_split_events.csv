@@ -1,0 +1,2 @@
+﻿event_type,strategy_time,code,event_date,per_base,bonus_pre_tax,net_bonus,tax_rate_percent,cash_in,scale_factor,old_amount,new_amount,cash_before,cash_after,positions_value_before,positions_value_after,total_value_before,total_value_after
+现金分红,2025-10-20 09:00:00,000001.XSHE,2025-10-15,10,2.36,1.888,20,1736.96,,,,2442.540000000008,4179.500000000008,104880.0,104880.0,107322.54000000001,109059.50000000001
