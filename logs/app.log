@@ -2547,3 +2547,68 @@ NameError: name 'schedule_function' is not defined
     schedule_function(trade, date_rules.every_day(), time_rules.market_open(minutes=5))
 NameError: name 'schedule_function' is not defined
 
+2026-05-30 10:02:26 [INFO] 日志将同时输出到文件: backtest_results/backtest.log (级别: INFO)
+2026-05-30 10:02:26 [INFO] ============================================================
+2026-05-30 10:02:26 [INFO] 开始回测: 2025-01-01 至 2025-06-01
+2026-05-30 10:02:26 [INFO] 初始资金: 100,000.00
+2026-05-30 10:02:26 [INFO] 回测频率: day
+2026-05-30 10:02:26 [INFO] 日志文件: backtest_results/backtest.log
+2026-05-30 10:02:26 [INFO] ============================================================
+2026-05-30 10:02:26 [INFO] 加载策略文件: src/learning01/main.py
+2026-05-30 10:02:26 [INFO] 策略文件加载成功
+2026-05-30 10:02:26 [INFO] 调用策略初始化函数...
+2026-05-30 10:02:26 [ERROR] 策略初始化失败: name 'schedule_function' is not defined
+2026-05-30 10:02:26 [ERROR] Traceback (most recent call last):
+  File "/home/jtb/QD/Quantitative-trading/.venv/lib/python3.10/site-packages/bullet_trade/core/engine.py", line 680, in _run_impl
+    self.initialize_func(self.context)
+  File "/home/jtb/QD/Quantitative-trading/src/learning01/main.py", line 11, in initialize
+    schedule_function(trade, date_rules.every_day(), time_rules.market_open(minutes=5))
+NameError: name 'schedule_function' is not defined
+
+2026-05-30 10:18:03 [INFO] 日志将同时输出到文件: backtest_results/backtest.log (级别: INFO)
+2026-05-30 10:18:03 [INFO] ============================================================
+2026-05-30 10:18:03 [INFO] 开始回测: 2025-01-01 至 2025-06-01
+2026-05-30 10:18:03 [INFO] 初始资金: 100,000.00
+2026-05-30 10:18:03 [INFO] 回测频率: day
+2026-05-30 10:18:03 [INFO] 日志文件: backtest_results/backtest.log
+2026-05-30 10:18:03 [INFO] ============================================================
+2026-05-30 10:18:03 [INFO] 加载策略文件: src/learning01/main.py
+2026-05-30 10:18:03 [INFO] 策略文件加载成功
+2026-05-30 10:18:03 [INFO] 调用策略初始化函数...
+2026-05-30 10:18:03 [ERROR] 策略初始化失败: name 'schedule_function' is not defined
+2026-05-30 10:18:03 [ERROR] Traceback (most recent call last):
+  File "/home/jtb/QD/Quantitative-trading/.venv/lib/python3.10/site-packages/bullet_trade/core/engine.py", line 680, in _run_impl
+    self.initialize_func(self.context)
+  File "/home/jtb/QD/Quantitative-trading/src/learning01/main.py", line 11, in initialize
+    schedule_function(trade, date_rules.every_day(), time_rules.market_open(minutes=5))
+NameError: name 'schedule_function' is not defined
+
+2026-05-30 10:18:48 [INFO] 日志将同时输出到文件: backtest_results/backtest.log (级别: INFO)
+2026-05-30 10:18:48 [INFO] ============================================================
+2026-05-30 10:18:48 [INFO] 开始回测: 2025-01-01 至 2025-06-01
+2026-05-30 10:18:48 [INFO] 初始资金: 100,000.00
+2026-05-30 10:18:48 [INFO] 回测频率: day
+2026-05-30 10:18:48 [INFO] 日志文件: backtest_results/backtest.log
+2026-05-30 10:18:48 [INFO] ============================================================
+2026-05-30 10:18:48 [INFO] 加载策略文件: src/learning01/main.py
+2026-05-30 10:18:48 [INFO] 策略文件加载成功
+2026-05-30 10:18:48 [INFO] 调用策略初始化函数...
+2026-05-30 10:18:48 [INFO] 策略初始化完成
+2026-05-30 10:29:39 [INFO] 日志将同时输出到文件: backtest_results/backtest.log (级别: INFO)
+2026-05-30 10:29:39 [INFO] ============================================================
+2026-05-30 10:29:39 [INFO] 开始回测: 2025-01-01 至 2025-06-01
+2026-05-30 10:29:39 [INFO] 初始资金: 100,000.00
+2026-05-30 10:29:39 [INFO] 回测频率: day
+2026-05-30 10:29:39 [INFO] 日志文件: backtest_results/backtest.log
+2026-05-30 10:29:39 [INFO] ============================================================
+2026-05-30 10:29:39 [INFO] 加载策略文件: src/learning01/main.py
+2026-05-30 10:29:39 [INFO] 策略文件加载成功
+2026-05-30 10:29:39 [INFO] 调用策略初始化函数...
+2026-05-30 10:29:39 [ERROR] 策略初始化失败: 请在项目根目录的 .env 文件中设置 JQDATA_USER 和 JQDATA_PWD
+2026-05-30 10:29:39 [ERROR] Traceback (most recent call last):
+  File "/home/jtb/QD/Quantitative-trading/.venv/lib/python3.10/site-packages/bullet_trade/core/engine.py", line 680, in _run_impl
+    self.initialize_func(self.context)
+  File "/home/jtb/QD/Quantitative-trading/src/learning01/main.py", line 16, in initialize
+    raise Exception("请在项目根目录的 .env 文件中设置 JQDATA_USER 和 JQDATA_PWD")
+Exception: 请在项目根目录的 .env 文件中设置 JQDATA_USER 和 JQDATA_PWD
+
