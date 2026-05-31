@@ -175,43 +175,45 @@ def s1_get_stock_list(context):
 # 1-3 整体调整持仓
 def s1_weekly_adjustment(context):
     subportfolio = context.subportfolios[0]
-    if g.s1_no_trading_today_signal == False:
-        s1_close_no_trading_hold(context)
-        g.s1_not_buy_again = []
-        g.s1_target_list = s1_get_stock_list(context)
-        target_list = g.s1_target_list[:g.s1_stock_num * 2]
-        log.info('[策略1]目标列表: %s' % str(target_list))
+    if g.s1_no_trading_today_signal == True:
+        return
+    s1_close_no_trading_hold(context)
+    g.s1_not_buy_again = []
+    g.s1_target_list = s1_get_stock_list(context)
+    target_list = g.s1_target_list[:g.s1_stock_num * 2]
+    log.info('[策略1]目标列表: %s' % str(target_list))
 
-        for stock in g.s1_hold_list:
-            if (stock not in target_list) and (stock not in g.s1_yesterday_HL_list):
-                log.info("[策略1]卖出[%s]" % (stock))
-                position = subportfolio.long_positions[stock]
-                s1_close_position(position)
-            else:
-                log.info("[策略1]已持有[%s]" % (stock))
+    for stock in g.s1_hold_list:
+        if (stock not in target_list) and (stock not in g.s1_yesterday_HL_list):
+            log.info("[策略1]卖出[%s]" % (stock))
+            position = subportfolio.long_positions[stock]
+            s1_close_position(position)
+        else:
+            log.info("[策略1]已持有[%s]" % (stock))
 
-        s1_buy_security(context, target_list)
+    s1_buy_security(context, target_list)
 
-        for position in list(subportfolio.long_positions.values()):
-            stock = position.security
-            g.s1_not_buy_again.append(stock)
+    for position in list(subportfolio.long_positions.values()):
+        stock = position.security
+        g.s1_not_buy_again.append(stock)
 
 
 # 1-4 调整昨日涨停股票
 def s1_check_limit_up(context):
     subportfolio = context.subportfolios[0]
     now_time = context.current_dt
-    if g.s1_yesterday_HL_list != []:
-        for stock in g.s1_yesterday_HL_list:
-            if stock in subportfolio.long_positions and subportfolio.long_positions[stock].closeable_amount > -100:
-                current_data = get_price(stock, end_date=now_time, frequency='1m', fields=['close', 'high_limit'], skip_paused=False, fq='pre', count=1, panel=False, fill_paused=True)
-                if current_data.iloc[0, 0] < current_data.iloc[0, 1]:
-                    log.info("[策略1][%s]涨停打开，卖出" % (stock))
-                    position = subportfolio.long_positions[stock]
-                    s1_close_position(position)
-                    g.s1_reason_to_sell = 'limitup'
-                else:
-                    log.info("[策略1][%s]涨停，继续持有" % (stock))
+    if g.s1_yesterday_HL_list == []:
+        return
+    for stock in g.s1_yesterday_HL_list:
+        if stock in subportfolio.long_positions and subportfolio.long_positions[stock].closeable_amount > -100:
+            current_data = get_price(stock, end_date=now_time, frequency='1m', fields=['close', 'high_limit'], skip_paused=False, fq='pre', count=1, panel=False, fill_paused=True)
+            if current_data.iloc[0, 0] < current_data.iloc[0, 1]:
+                log.info("[策略1][%s]涨停打开，卖出" % (stock))
+                position = subportfolio.long_positions[stock]
+                s1_close_position(position)
+                g.s1_reason_to_sell = 'limitup'
+            else:
+                log.info("[策略1][%s]涨停，继续持有" % (stock))
 
 
 # 1-5 如果昨天有股票卖出，剩余的金额今天早上买入
@@ -246,38 +248,40 @@ def s1_trade_afternoon(context):
 # 1-7 止盈止损
 def s1_sell_stocks(context):
     subportfolio = context.subportfolios[0]
-    if g.s1_run_stoploss == True:
-        if g.s1_stoploss_strategy == 1:
+    if g.s1_run_stoploss == False:
+        return
+    
+    if g.s1_stoploss_strategy == 1:
+        for stock in list(subportfolio.long_positions.keys()):
+            if subportfolio.long_positions[stock].price >= subportfolio.long_positions[stock].avg_cost * 2:
+                order_target_value(stock, 0, pindex=0)
+                log.debug("[策略1]收益100%止盈,卖出{}".format(stock))
+            elif subportfolio.long_positions[stock].price < subportfolio.long_positions[stock].avg_cost * g.s1_stoploss_limit:
+                order_target_value(stock, 0, pindex=0)
+                log.debug("[策略1]收益止损,卖出{}".format(stock))
+                g.s1_reason_to_sell = 'stoploss'
+    elif g.s1_stoploss_strategy == 2:
+        stock_df = get_price(security=get_index_stocks('399101.XSHE'), end_date=context.previous_date, frequency='daily', fields=['close', 'open'], count=1, panel=False)
+        down_ratio = (stock_df['close'] / stock_df['open']).mean()
+        if down_ratio <= g.s1_stoploss_market:
+            g.s1_reason_to_sell = 'stoploss'
+            log.debug("[策略1]大盘惨跌,平均降幅{:.2%}".format(down_ratio))
             for stock in list(subportfolio.long_positions.keys()):
-                if subportfolio.long_positions[stock].price >= subportfolio.long_positions[stock].avg_cost * 2:
-                    order_target_value(stock, 0, pindex=0)
-                    log.debug("[策略1]收益100%止盈,卖出{}".format(stock))
-                elif subportfolio.long_positions[stock].price < subportfolio.long_positions[stock].avg_cost * g.s1_stoploss_limit:
+                order_target_value(stock, 0, pindex=0)
+    elif g.s1_stoploss_strategy == 3:
+        stock_df = get_price(security=get_index_stocks('399101.XSHE'), end_date=context.previous_date, frequency='daily', fields=['close', 'open'], count=1, panel=False)
+        down_ratio = (stock_df['close'] / stock_df['open']).mean()
+        if down_ratio <= g.s1_stoploss_market:
+            g.s1_reason_to_sell = 'stoploss'
+            log.debug("[策略1]大盘惨跌,平均降幅{:.2%}".format(down_ratio))
+            for stock in list(subportfolio.long_positions.keys()):
+                order_target_value(stock, 0, pindex=0)
+        else:
+            for stock in list(subportfolio.long_positions.keys()):
+                if subportfolio.long_positions[stock].price < subportfolio.long_positions[stock].avg_cost * g.s1_stoploss_limit:
                     order_target_value(stock, 0, pindex=0)
                     log.debug("[策略1]收益止损,卖出{}".format(stock))
                     g.s1_reason_to_sell = 'stoploss'
-        elif g.s1_stoploss_strategy == 2:
-            stock_df = get_price(security=get_index_stocks('399101.XSHE'), end_date=context.previous_date, frequency='daily', fields=['close', 'open'], count=1, panel=False)
-            down_ratio = (stock_df['close'] / stock_df['open']).mean()
-            if down_ratio <= g.s1_stoploss_market:
-                g.s1_reason_to_sell = 'stoploss'
-                log.debug("[策略1]大盘惨跌,平均降幅{:.2%}".format(down_ratio))
-                for stock in list(subportfolio.long_positions.keys()):
-                    order_target_value(stock, 0, pindex=0)
-        elif g.s1_stoploss_strategy == 3:
-            stock_df = get_price(security=get_index_stocks('399101.XSHE'), end_date=context.previous_date, frequency='daily', fields=['close', 'open'], count=1, panel=False)
-            down_ratio = (stock_df['close'] / stock_df['open']).mean()
-            if down_ratio <= g.s1_stoploss_market:
-                g.s1_reason_to_sell = 'stoploss'
-                log.debug("[策略1]大盘惨跌,平均降幅{:.2%}".format(down_ratio))
-                for stock in list(subportfolio.long_positions.keys()):
-                    order_target_value(stock, 0, pindex=0)
-            else:
-                for stock in list(subportfolio.long_positions.keys()):
-                    if subportfolio.long_positions[stock].price < subportfolio.long_positions[stock].avg_cost * g.s1_stoploss_limit:
-                        order_target_value(stock, 0, pindex=0)
-                        log.debug("[策略1]收益止损,卖出{}".format(stock))
-                        g.s1_reason_to_sell = 'stoploss'
 
 
 # 3-2 调整放量股票
