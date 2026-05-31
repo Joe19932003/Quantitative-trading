@@ -6,7 +6,7 @@ import numpy as np
 # 初始化函数，设定基准等等
 def initialize(context):
     # 设定平安银行股价为基准值
-    set_benchmark('000001.XSHG')
+    set_benchmark('000001.XSHE')
     # 开启动态复权模式(真实价格)
     set_option('use_real_price', True)
     # 输出内容到日志 log.info()
@@ -31,17 +31,43 @@ def initialize(context):
     g.long_period = 10
     g.cut_off_percent = 0.01 # 当股价的短期均线低于长期均线的10%，则卖出
     g.cut_in_percent = 0.01 # 当股价的短期均线高于长期均线的20%，则买入
+    g.is_no_trade_period = False # 是否在非交易时间段内
+    g.pass_january = True
+    g.pass_april = True
 
+
+ # 是否在非交易时间段内
+def is_no_trade_period(context):
+    today = context.current_dt.strftime('%m-%d')
+    if (('01-01' <= today) and (today <= '01-30')):
+        if g.pass_january is True:
+            return True
+        else:
+            return False
+    elif (('04-01' <= today) and (today <= '04-30')):
+        if g.pass_april is True:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+def sell_all_stock(context):
+    order_target(g.security, 0)
 
 ## 开盘前运行函数
 def before_market_open(context):
     # 输出运行时间
     log.info('函数运行时间(before_market_open):'+str(context.current_dt.time()))
-
+    g.is_no_trade_period = is_no_trade_period(context)
 
 ## 开盘时运行函数
 def market_open(context):
     log.info('函数运行时间(market_open):'+str(context.current_dt.time()))
+    if g.is_no_trade_period:
+        sell_all_stock(context)
+        log.info("当前时间在非交易时间段内，已卖出所有股票")
+        return
     security = g.security
     # 获取股票的收盘价
     close_short_data = get_bars(security, count=g.short_period, unit='1d', fields=['close'])
