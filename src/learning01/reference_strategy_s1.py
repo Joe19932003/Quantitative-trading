@@ -35,15 +35,12 @@ def initialize(context):
             open_commission=0.0003,
             close_commission=0.0003,
             min_commission=0.5,
-            transfer_fee=0.00002    # 双向万0.2过户费
         ),
         type="stock",
     )
 
     # 在 initialize 中增加
-    set_slippage(PriceRelatedSlippage(0.003))  # 0.3%的价格冲击
-    set_option('volume_limit', 0.1)  # 单股委托量不超过近25日均成交量的10%
-    set_option('skip_suspended_securities', True)
+    set_slippage(PriceRelatedSlippage(0.02), type='stock')
 
     # 过滤order中低于error级别的日志
     log.set_level('order', 'error')
